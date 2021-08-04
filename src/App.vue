@@ -1,26 +1,48 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <!-- <div v-if="!isLoggedIn" class="row">
+    <Login />
+  </div> -->
+  <div class="row">
+    <q-layout view="hHh lpR fFf">
+      <Header />
+      <q-page-container>
+        <router-view />
+      </q-page-container>
+    </q-layout>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { defineComponent, onBeforeMount, ref } from "vue";
+import useGeneral from "./composables/useGeneral";
+import Header from "./components/Layout/Header.vue";
+// import Login from "./domain/user/login.vue";
 
-export default {
-  name: 'App',
+export default defineComponent({
   components: {
-    HelloWorld
-  }
-}
+    Header,
+    // Login,
+  },
+  setup() {
+    const isLoggedIn = ref(false);
+    const { firebase, router, route } = useGeneral();
+
+    onBeforeMount(() => {
+      firebase.auth().onAuthStateChanged((user) => {
+        if (!user) {
+          router.replace("/login");
+        } else if (route.path == "/login") {
+          isLoggedIn.value = true;
+          router.replace("/");
+        }
+      });
+    });
+
+    return {
+      isLoggedIn,
+    };
+  },
+});
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+<style lang="scss"></style>
